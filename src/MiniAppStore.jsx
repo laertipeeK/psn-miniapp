@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 const products = {
   psn: [
@@ -23,3 +21,52 @@ const products = {
     { id: 'apple3000', title: 'Apple Gift Card: 3000₽', price: 3870 },
   ]
 };
+
+export default function MiniAppStore() {
+  const [tab, setTab] = useState('psn');
+  const [cart, setCart] = useState([]);
+
+  const addToCart = (item) => {
+    setCart([...cart, item]);
+  };
+
+  const total = cart.reduce((acc, item) => acc + item.price, 0);
+
+  const handleCheckout = () => {
+    const robokassaTestUrl = 'https://auth.robokassa.ru/Merchant/Index.aspx';
+    const description = encodeURIComponent('Оплата цифровых кодов');
+    const sum = total.toFixed(2);
+
+    window.open(`${robokassaTestUrl}?MrchLogin=demo&OutSum=${sum}&Desc=${description}&SignatureValue=TEST`, '_blank');
+  };
+
+  return (
+    <div style={{ padding: '1rem' }}>
+      <div style={{ marginBottom: '1rem' }}>
+        <button onClick={() => setTab('psn')}>Карты PS Store</button>
+        <button onClick={() => setTab('apple')} style={{ marginLeft: '1rem' }}>Карты Apple</button>
+      </div>
+      <div style={{ display: 'grid', gap: '1rem' }}>
+        {products[tab].map(item => (
+          <div key={item.id} style={{ padding: '1rem', border: '1px solid #ccc', borderRadius: '8px' }}>
+            <strong>{item.title}</strong>
+            <div>{item.price} ₽</div>
+            <button onClick={() => addToCart(item)} style={{ marginTop: '0.5rem' }}>Купить</button>
+          </div>
+        ))}
+      </div>
+      {cart.length > 0 && (
+        <div style={{ marginTop: '2rem', padding: '1rem', border: '2px solid #333' }}>
+          <h3>Корзина</h3>
+          <ul>
+            {cart.map((item, i) => (
+              <li key={i}>{item.title} — {item.price} ₽</li>
+            ))}
+          </ul>
+          <div><strong>Итого: {total} ₽</strong></div>
+          <button onClick={handleCheckout}>Перейти к оплате</button>
+        </div>
+      )}
+    </div>
+  );
+}
